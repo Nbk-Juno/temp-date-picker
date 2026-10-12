@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pick a Date</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: single mobile column, one step per screen, fixed bottom action bar */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#141A26; --muted:#5D6678; --line:#DCE1EA;
+  --accent:#2E5BFF; --accent-ink:#FFFFFF; --accent-soft:#E3EAFF; --hot:#E8600F;
+  --display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0E121A; --surface:#171D29; --ink:#EEF1F7; --muted:#9AA3B5; --line:#2A3242;
+  --accent:#6F8DFF; --accent-ink:#0E121A; --accent-soft:#1E2A4D; --hot:#FF9561; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+.wrap{max-width:480px;margin:0 auto;padding-inline:20px;padding-block:calc(20px + env(safe-area-inset-top,0px)) 120px;display:flex;flex-direction:column;gap:20px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.stack.tight{gap:4px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--display);font-weight:800;font-size:32px;line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--display);font-weight:600;font-size:22px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:0}
+.progress{display:flex;gap:6px}
+.progress span{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.progress span.on{background:var(--accent)}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-weight:600;font-size:14px}
+input[type=text],input[type=email]{width:100%;font:inherit;font-size:17px;padding:14px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.err{color:var(--hot);font-size:14px;font-weight:600;min-height:1em;margin:0}
+.prefs{display:flex;flex-direction:column;gap:10px}
+.pref{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;padding:16px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pref .glyph{width:40px;height:40px;border-radius:10px;background:var(--accent-soft);display:grid;place-items:center;flex:none}
+.pref .glyph svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pref b{display:block;font-size:17px}
+.pref small{color:var(--muted);font-size:14px}
+.pref[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.week{display:flex;flex-direction:column;gap:8px}
+.weeklabel{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.day{font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.day .dow{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.day .num{font-family:var(--display);font-size:22px;font-weight:600;line-height:1}
+.day .mon{font-size:12px;color:var(--muted)}
+.day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.day[aria-pressed="true"] .dow,.day[aria-pressed="true"] .mon{color:var(--accent-ink)}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:inherit;font-size:14px;font-weight:600;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px))}
+.bar .inner{max-width:480px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:700;font-size:17px;padding:15px 18px;border-radius:14px;border:0;cursor:pointer}
+.primary{flex:1;background:var(--accent);color:var(--accent-ink)}
+.primary:disabled{opacity:.5;cursor:wait}
+.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.count{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.thanks{display:flex;flex-direction:column;gap:8px;padding:20px;border-radius:16px;background:var(--accent);color:var(--accent-ink)}
+.thanks h2{color:var(--accent-ink)}
+.thanks p{margin:0}
+.top{display:flex;flex-direction:column;gap:10px}
+.toprow{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.rank{font-family:var(--display);font-weight:800;font-size:26px;line-height:1;color:var(--accent);min-width:22px}
+.toprow .meta{min-width:0;display:flex;flex-direction:column;gap:4px}
+.toprow b{font-size:17px}
+.names{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{font-size:14px;padding:6px 10px;border-radius:999px;background:var(--accent-soft);color:var(--ink);font-variant-numeric:tabular-nums}
+.all{display:flex;flex-direction:column;gap:10px}
+.rowb{display:grid;grid-template-columns:72px minmax(0,1fr) 28px;gap:4px 10px;align-items:center}
+.rowb .d{font-size:14px;font-weight:600}
+.track{height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:6px}
+.rowb.best .fill{background:var(--hot)}
+.rowb .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.rowb .names{grid-column:2 / 4}
+.empty{padding:16px;border-radius:14px;border:1.5px dashed var(--line);color:var(--muted)}
+.linkish{background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px;align-self:flex-start}
+.notice{padding:12px 14px;border-radius:12px;background:var(--accent-soft);font-size:14px}
+@media (prefers-reduced-motion:no-preference){.screen{animation:in .25s ease-out}@keyframes in{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow" id="eyebrow"></span>
+    <h1 id="title"></h1>
+  </header>
+  <div class="notice" id="demo" hidden>Demo mode: answers save only in this browser. Add your Apps Script URL to config.js to collect real responses.</div>
+  <div class="progress" id="progress" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <section class="screen" id="s1">
+    <div class="stack">
+      <p class="sub">Takes about 30 seconds. Answer once and you'll see which dates work for the most people.</p>
+      <div class="field"><label for="name">Your name</label><input id="name" type="text" autocomplete="name" placeholder="First and last name" maxlength="80"></div>
+      <div class="field"><label for="email">Best email</label><input id="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" maxlength="254"></div>
+      <p class="err" id="err1" role="alert"></p>
+      <button class="linkish" id="peek" type="button">Just see the results</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s2" hidden>
+    <div class="stack">
+      <h2>How do you want to meet?</h2>
+      <div class="prefs" id="prefs"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s3" hidden>
+    <div class="stack">
+      <div class="stack tight"><h2>Which days work?</h2><p class="sub">Tap every day you could make it.</p></div>
+      <div class="quick">
+        <button class="chip" type="button" id="q-wd">All weekdays</button>
+        <button class="chip" type="button" id="q-we">All weekends</button>
+        <button class="chip" type="button" id="q-clr">Clear</button>
+      </div>
+      <div id="calendar" class="stack"></div>
+      <p class="err" id="err3" role="alert"></p>
+    </div>
+  </section>
+
+  <section class="screen" id="s4" hidden>
+    <div class="stack" style="gap:22px">
+      <div class="thanks" id="thanks" hidden><h2>Thanks, <span id="tname"></span>!</h2><p>You're in. Here's where the group stands right now.</p></div>
+      <div class="notice" id="notice" hidden></div>
+      <div class="stack" style="gap:10px">
+        <h2>Best dates so far</h2>
+        <div class="stats" id="stats"></div>
+        <div class="top" id="top"><div class="empty">Loading responses…</div></div>
+      </div>
+      <div class="stack" style="gap:12px">
+        <h2>Every date</h2>
+        <div class="all" id="all"></div>
+      </div>
+      <div class="quick"><button class="chip" id="refresh" type="button">Refresh results</button></div>
+      <button class="linkish" id="again" type="button">Change my answers</button>
+    </div>
+  </section>
+</div>
+
+<div class="bar" id="bar"><div class="inner">
+  <button class="btn ghost" id="back" type="button" hidden>Back</button>
+  <span class="count" id="count" hidden>0 days</span>
+  <button class="btn primary" id="next" type="button">Next</button>
+</div></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
