@@ -26,5 +26,5 @@ window.PICKER_CONFIG = {
 
   // The Apps Script web app URL (ends in /exec). Leave empty to run in demo mode,
   // which saves only in this browser so you can preview the flow.
-  apiUrl: "",
+  apiUrl: "https://script.google.com/macros/s/AKfycbxzzB74u8aJ0WCSTjUKY9uEw5a6vUGapr053md25iMmEyFx5PRSd6o9GIuRxyTAVTirhQ/exec",
 };
